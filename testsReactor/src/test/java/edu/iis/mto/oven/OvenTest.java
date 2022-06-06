@@ -88,7 +88,7 @@ class OvenTest {
     }
 
     @Test
-    void shouldNotSuccess_FanAlwaysOff(){
+    void shouldNotSuccess_FanAlwaysOff() {
         stagesList.add(
                 ProgramStage.builder()
                         .withStageTime(0)
@@ -125,6 +125,39 @@ class OvenTest {
         assertEquals(1, bakingResult.getStageCompletenes().size());
         bakingResult.getStageCompletenes()
                 .forEach((stage, completeness) -> assertFalse(completeness));
+    }
+
+    @Test
+    void shouldCompleteStages() {
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(200)
+                        .withHeat(HeatType.HEATER)
+                        .build()
+        );
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(200)
+                        .withHeat(HeatType.THERMO_CIRCULATION)
+                        .build()
+        );
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(170)
+                        .withHeat(HeatType.GRILL)
+                        .build()
+        );
+
+        when(fan.isOn()).thenReturn(true);
+
+        bakingResult = oven.runProgram(bakingProgram);
+        assertTrue(bakingResult.isSuccess());
+        assertEquals(3, bakingResult.getStageCompletenes().size());
+        bakingResult.getStageCompletenes()
+                .forEach((stage, completeness) -> assertTrue(completeness));
     }
 
 
