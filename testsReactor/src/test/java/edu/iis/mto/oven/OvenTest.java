@@ -109,4 +109,23 @@ class OvenTest {
         assertFalse(bakingResult.isSuccess());
     }
 
+    @Test
+    void shouldNotCompleteStage_HeatingModuleHeaterError() throws HeatingException {
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(200)
+                        .withHeat(HeatType.HEATER)
+                        .build()
+        );
+        doThrow(HeatingException.class).when(heatingModule).heater(any());
+
+        bakingResult = oven.runProgram(bakingProgram);
+        assertFalse(bakingResult.isSuccess());
+        assertEquals(1, bakingResult.getStageCompletenes().size());
+        bakingResult.getStageCompletenes()
+                .forEach((stage, completeness) -> assertFalse(completeness));
+    }
+
+
 }
