@@ -10,12 +10,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class OvenTest {
 
     Oven oven;
     BakingProgram bakingProgram;
     BakingResult bakingResult;
+    List<ProgramStage> stagesList;
 
     @Mock
     HeatingModule heatingModule;
@@ -26,7 +30,13 @@ class OvenTest {
     @BeforeEach
     void setUp() {
         oven = new Oven(heatingModule, fan);
-        bakingProgram = BakingProgram.builder().withCoolAtFinish(false).withInitialTemp(0).build();
+        stagesList = new ArrayList<>();
+        bakingProgram =
+                BakingProgram.builder()
+                        .withCoolAtFinish(false)
+                        .withInitialTemp(0)
+                        .withStages(stagesList)
+                        .build();
     }
 
     @Test
@@ -39,5 +49,6 @@ class OvenTest {
         bakingResult = oven.runProgram(bakingProgram);
         assertTrue(bakingResult.isSuccess());
     }
+
 
 }
