@@ -2,8 +2,10 @@ package edu.iis.mto.oven;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +69,22 @@ class OvenTest {
                 .forEach((stage, completeness) -> assertTrue(completeness));
     }
 
+    @Test
+    void shouldNotCompleteStage_HeatingModuleError() throws HeatingException {
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(0)
+                        .withTargetTemp(0)
+                        .withHeat(HeatType.THERMO_CIRCULATION)
+                        .build()
+        );
+        doThrow(HeatingException.class).when(heatingModule).termalCircuit(any());
 
+        bakingResult = oven.runProgram(bakingProgram);
+        assertFalse(bakingResult.isSuccess());
+        assertEquals(1, bakingResult.getStageCompletenes().size());
+        bakingResult.getStageCompletenes()
+                .forEach((stage, completeness) -> assertFalse(completeness));
+    }
 
 }
