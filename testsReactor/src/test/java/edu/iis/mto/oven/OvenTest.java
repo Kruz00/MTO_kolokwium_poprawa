@@ -2,6 +2,7 @@ package edu.iis.mto.oven;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,23 @@ class OvenTest {
         bakingResult = oven.runProgram(bakingProgram);
         assertTrue(bakingResult.isSuccess());
     }
+
+    @Test
+    void shouldCompleteEmptyStage() {
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(0)
+                        .withTargetTemp(0)
+                        .withHeat(HeatType.THERMO_CIRCULATION)
+                        .build()
+        );
+        bakingResult = oven.runProgram(bakingProgram);
+        assertTrue(bakingResult.isSuccess());
+        assertEquals(1, bakingResult.getStageCompletenes().size());
+        bakingResult.getStageCompletenes()
+                .forEach((stage, completeness) -> assertTrue(completeness));
+    }
+
 
 
 }
