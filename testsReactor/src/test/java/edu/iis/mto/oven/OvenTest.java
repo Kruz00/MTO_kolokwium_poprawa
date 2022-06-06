@@ -160,5 +160,41 @@ class OvenTest {
                 .forEach((stage, completeness) -> assertTrue(completeness));
     }
 
+    @Test
+    void shouldNotCompleteOneStage_GrillError() throws HeatingException {
+        ProgramStage badPS = ProgramStage.builder()
+                .withStageTime(10)
+                .withTargetTemp(170)
+                .withHeat(HeatType.GRILL)
+                .build();
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(200)
+                        .withHeat(HeatType.HEATER)
+                        .build()
+        );
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(10)
+                        .withTargetTemp(200)
+                        .withHeat(HeatType.THERMO_CIRCULATION)
+                        .build()
+        );
+        stagesList.add(badPS);
+
+        doThrow(HeatingException.class).when(heatingModule).grill(any());
+        when(fan.isOn()).thenReturn(true);
+
+        bakingResult = oven.runProgram(bakingProgram);
+        assertFalse(bakingResult.isSuccess());
+        assertEquals(3, bakingResult.getStageCompletenes().size());
+        bakingResult.getStageCompletenes()
+                .forEach((stage, completeness) -> {
+                    if(stage==badPS)
+                        assertFalse(completeness);
+                    else assertTrue(completeness);
+                });
+    }
 
 }
