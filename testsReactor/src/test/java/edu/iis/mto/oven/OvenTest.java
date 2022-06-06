@@ -87,4 +87,26 @@ class OvenTest {
                 .forEach((stage, completeness) -> assertFalse(completeness));
     }
 
+    @Test
+    void shouldNotSuccess_FanAlwaysOff(){
+        stagesList.add(
+                ProgramStage.builder()
+                        .withStageTime(0)
+                        .withTargetTemp(0)
+                        .withHeat(HeatType.THERMO_CIRCULATION)
+                        .build()
+        );
+        when(fan.isOn()).thenReturn(false);
+
+        bakingProgram =
+                BakingProgram.builder()
+                        .withCoolAtFinish(true)
+                        .withInitialTemp(0)
+                        .withStages(stagesList)
+                        .build();
+
+        bakingResult = oven.runProgram(bakingProgram);
+        assertFalse(bakingResult.isSuccess());
+    }
+
 }
